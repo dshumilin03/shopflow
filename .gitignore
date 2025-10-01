@@ -1,0 +1,25 @@
+# IntelliJ project files
+.idea/
+*.iml
+out/
+
+.vscode/
+
+# Build output
+target/
+build/
+*.class
+*.jar
+*.war
+*.ear
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Docker
+*.pid
+.env
