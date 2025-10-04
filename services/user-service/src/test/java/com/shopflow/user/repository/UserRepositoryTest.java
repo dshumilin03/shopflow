@@ -24,7 +24,6 @@ public class UserRepositoryTest {
 
     @Test
     void testSaveAndFindByEmail() {
-        // given
         User user = new User();
         user.setEmail("test@example.com");
         user.setPasswordHash("hashed_password");
@@ -32,10 +31,8 @@ public class UserRepositoryTest {
         user.setRole(Role.USER);
 
         userRepository.save(user);
-        // when
         Optional<User> foundUser = userRepository.findByEmail("test@example.com");
 
-        // then
         assertThat(foundUser).isPresent();
         assertThat(foundUser.get().getEmail()).isEqualTo("test@example.com");
         assertThat(foundUser.get().getPasswordHash()).isEqualTo("hashed_password");
@@ -43,24 +40,20 @@ public class UserRepositoryTest {
 
     @Test
     void findByEmail_shouldReturnUser() {
-        // given
         User user = new User();
         user.setEmail("unique@example.com");
         user.setPasswordHash("hash");
         user.setRole(Role.ADMIN);
         userRepository.save(user);
 
-        // when
         Optional<User> found = userRepository.findByEmail("unique@example.com");
 
-        // then
         assertThat(found).isPresent();
         assertThat(found.get().getRole()).isEqualTo(Role.ADMIN);
     }
 
     @Test
     void duplicateEmail_shouldThrowException() {
-        // given
         User user1 = new User();
         user1.setEmail("dup@example.com");
         user1.setPasswordHash("hash1");
@@ -72,7 +65,6 @@ public class UserRepositoryTest {
         user2.setPasswordHash("hash2");
         user2.setRole(Role.USER);
 
-        // when + then
         assertThrows(Exception.class, () -> userRepository.saveAndFlush(user2));
     }
 }

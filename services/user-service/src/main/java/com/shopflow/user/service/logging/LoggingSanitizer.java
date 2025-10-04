@@ -17,27 +17,34 @@ public class LoggingSanitizer {
     private static final String MASK = "***";
 
     public String sanitize(Object[] args) {
-
         if (args == null || args.length == 0) {
             return "[]";
         }
 
-        Map<String, Object> sanitzed = new LinkedHashMap<>();
+        Map<String, Object> sanitized = new LinkedHashMap<>();
+        Set<Object> visited = Collections.newSetFromMap(new IdentityHashMap<>());
 
         for (int i = 0; i < args.length; i++) {
-            sanitzed.put("arg" + i, sanitizeValue(args[i]));
+            sanitized.put("arg" + i, sanitizeValue(args[i], visited));
         }
 
         try {
-            return MAPPER.writeValueAsString(sanitzed);
+            return MAPPER.writeValueAsString(sanitized);
         } catch (Exception e) {
             log.debug("Failed to serialize sanitized args", e);
-            return sanitzed.toString();
+            return sanitized.toString();
         }
     }
 
-    private Object sanitizeValue(Object value) {
-        if (value == null) return "<null>";
+    private Object sanitizeValue(Object value, Set<Object> visited) {
+        if (value == null) {
+            return "<null>";
+        }
+
+        if (visited.contains(value)) {
+            return "<recursion>";
+        }
+        visited.add(value);
 
         if (value instanceof String s) {
             if (s.length() > MAX_STRING_LENGTH) {
@@ -51,44 +58,49 @@ public class LoggingSanitizer {
         }
 
         if (value instanceof Collection<?> col) {
-            return sanitizeCollection(col);
+            return sanitizeCollection(col, visited);
         }
 
         if (value instanceof Map<?, ?> map) {
-            return sanitizeMap(map);
+            return sanitizeMap(map, visited);
         }
 
-        return sanitizeObject(value);
+        return sanitizeObject(value, visited);
     }
 
-    private List<Object> sanitizeCollection(Collection<?> collection) {
+    private List<Object> sanitizeCollection(Collection<?> collection, Set<Object> visited) {
         List<Object> result = new ArrayList<>();
         for (Object item : collection) {
-            result.add(sanitizeValue(item));
+            result.add(sanitizeValue(item, visited));
         }
         return result;
     }
 
-    private Map<Object, Object> sanitizeMap(Map<?, ?> map) {
+    private Map<Object, Object> sanitizeMap(Map<?, ?> map, Set<Object> visited) {
         Map<Object, Object> result = new LinkedHashMap<>();
         for (Map.Entry<?, ?> entry : map.entrySet()) {
-            result.put(entry.getKey(), sanitizeValue(entry.getValue()));
+            result.put(entry.getKey(), sanitizeValue(entry.getValue(), visited));
         }
         return result;
     }
 
-    private Map<String, Object> sanitizeObject(Object obj) {
+    private Map<String, Object> sanitizeObject(Object obj, Set<Object> visited) {
         Map<String, Object> sanitized = new LinkedHashMap<>();
         Class<?> clazz = obj.getClass();
 
         for (Field field : clazz.getDeclaredFields()) {
+
+            if (field.isSynthetic() || field.getName().startsWith("this$") || field.getName().equals("serialVersionUID")) {
+                continue;
+            }
+
             field.setAccessible(true);
             try {
                 Object value = field.get(obj);
                 if (field.isAnnotationPresent(Sensitive.class)) {
                     sanitized.put(field.getName(), MASK);
                 } else {
-                    sanitized.put(field.getName(), sanitizeValue(value));
+                    sanitized.put(field.getName(), sanitizeValue(value, visited));
                 }
             } catch (Exception e) {
                 sanitized.put(field.getName(), "<error>");
@@ -98,14 +110,14 @@ public class LoggingSanitizer {
     }
 
     private boolean isPrimitiveOrWrapper(Class<?> clazz) {
-        return clazz.isPrimitive() ||
-                clazz.equals(Boolean.class) ||
-                clazz.equals(Byte.class) ||
-                clazz.equals(Character.class) ||
-                clazz.equals(Short.class) ||
-                clazz.equals(Integer.class) ||
-                clazz.equals(Long.class) ||
-                clazz.equals(Float.class) ||
-                clazz.equals(Double.class);
+        return clazz.isPrimitive()
+                || clazz.equals(Boolean.class)
+                || clazz.equals(Byte.class)
+                || clazz.equals(Character.class)
+                || clazz.equals(Short.class)
+                || clazz.equals(Integer.class)
+                || clazz.equals(Long.class)
+                || clazz.equals(Float.class)
+                || clazz.equals(Double.class);
     }
 }
