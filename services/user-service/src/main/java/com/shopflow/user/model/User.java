@@ -5,18 +5,17 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+@Entity
+@Table(name = "users")
 @Getter
 @Setter
 @NoArgsConstructor
-@Entity
-@Table(name = "users")
 public class User {
     @Id
     @UuidGenerator
@@ -43,4 +42,5 @@ public class User {
     @UpdateTimestamp
     @Column(name="updated_at")
     OffsetDateTime updatedAt;
+
 }
