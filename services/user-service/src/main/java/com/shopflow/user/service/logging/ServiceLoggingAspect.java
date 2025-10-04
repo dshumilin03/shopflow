@@ -18,7 +18,7 @@ public class ServiceLoggingAspect {
 
     private final LoggingSanitizer sanitizer;
 
-    @Around("execution(* com.shopflow.user.service..*(..))")
+    @Around("execution(* com.shopflow.user.service..*(..)) && !within(com.shopflow.user.service.logging..*)")
     public Object logAround(ProceedingJoinPoint joinPoint) throws Throwable {
         String correlationId = MDC.get("correlationId");
         String methodName = joinPoint.getSignature().getName();

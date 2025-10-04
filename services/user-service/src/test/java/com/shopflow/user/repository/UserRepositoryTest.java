@@ -4,6 +4,7 @@ import com.shopflow.user.TestcontainersConfiguration;
 import com.shopflow.user.model.User;
 import com.shopflow.user.model.Role;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,10 +18,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest
 @Import(TestcontainersConfiguration.class)
 @Transactional
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UserRepositoryTest {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     @Test
     void testSaveAndFindByEmail() {

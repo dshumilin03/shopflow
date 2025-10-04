@@ -10,6 +10,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.slf4j.MDC;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -59,7 +60,7 @@ public class ControllerLoggingAspect {
             return result;
         } catch (Exception e) {
             long duration = System.currentTimeMillis() - start;
-            int status = response.getStatus();
+            int status = HttpStatus.INTERNAL_SERVER_ERROR.value();
 
             log.error(
                     "[Controller][ERROR] {} {}{} | status={} | duration={}ms | correlationId={} | handler={} | error={} | args={}",

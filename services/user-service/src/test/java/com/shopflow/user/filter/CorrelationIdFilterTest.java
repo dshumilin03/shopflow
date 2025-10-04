@@ -8,6 +8,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
@@ -15,6 +16,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
+@SpringBootTest
 class CorrelationIdFilterTest {
 
     private final CorrelationIdFilter filter = new CorrelationIdFilter();

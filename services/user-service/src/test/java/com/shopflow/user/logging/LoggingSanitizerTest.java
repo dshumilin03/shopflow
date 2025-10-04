@@ -4,6 +4,7 @@ import com.shopflow.user.service.logging.LoggingSanitizer;
 import com.shopflow.user.service.logging.annotation.Sensitive;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@SpringBootTest
 class LoggingSanitizerTest {
 
     private final LoggingSanitizer sanitizer = new LoggingSanitizer();
