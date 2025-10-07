@@ -5,6 +5,7 @@ import com.shopflow.user.service.logging.annotation.Sensitive;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.*;
 
@@ -57,6 +58,10 @@ public class LoggingSanitizer {
             return value;
         }
 
+        if (value.getClass().isArray()) {
+            return sanitizeArray(value, visited);
+        }
+
         if (value instanceof Collection<?> col) {
             return sanitizeCollection(col, visited);
         }
@@ -66,6 +71,17 @@ public class LoggingSanitizer {
         }
 
         return sanitizeObject(value, visited);
+    }
+
+    private List<Object> sanitizeArray(Object array, Set<Object> visited) {
+        int length = java.lang.reflect.Array.getLength(array);
+        List<Object> result = new ArrayList<>();
+        for (int i = 0; i < length; i++) {
+            Object element = java.lang.reflect.Array.get(array, i);
+            result.add(sanitizeValue(element, visited));
+        }
+
+        return result;
     }
 
     private List<Object> sanitizeCollection(Collection<?> collection, Set<Object> visited) {

@@ -1,4 +1,4 @@
-package com.shopflow.user.service.impl;
+package com.shopflow.user.service;
 
 import com.shopflow.user.dto.UserRequest;
 import com.shopflow.user.dto.UserResponse;
@@ -8,6 +8,7 @@ import com.shopflow.user.model.User;
 import com.shopflow.user.repository.UserRepository;
 import com.shopflow.user.service.exception.UserAlreadyExistsException;
 import com.shopflow.user.service.exception.UserNotFoundException;
+import com.shopflow.user.service.impl.UserServiceImpl;
 import com.shopflow.user.service.password.PasswordService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

@@ -45,8 +45,6 @@ class ControllerLoggingAspectTest {
         appender.stop();
     }
 
-    // ──────────────────────────────── TESTS ────────────────────────────────
-
     @Test
     @Order(1)
     @DisplayName("Logs successful controller call with correlationId and args")
@@ -108,7 +106,7 @@ class ControllerLoggingAspectTest {
         assertThat(message).contains("correlationId=");
         String cid = message.substring(message.indexOf("correlationId=") + 14).split(" ")[0];
         assertThat(cid).isNotBlank();
-        UUID.fromString(cid); // validate UUID format
+        UUID.fromString(cid);
     }
 
     @Test
