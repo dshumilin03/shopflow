@@ -3,6 +3,7 @@ package com.shopflow.user.service.logging;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shopflow.user.service.logging.annotation.Sensitive;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Array;
@@ -58,6 +59,11 @@ public class LoggingSanitizer {
             return value;
         }
 
+        if (value.getClass().isEnum()) {
+            return ((Enum<?>) value).name();
+        }
+
+
         if (value.getClass().isArray()) {
             return sanitizeArray(value, visited);
         }
@@ -68,6 +74,19 @@ public class LoggingSanitizer {
 
         if (value instanceof Map<?, ?> map) {
             return sanitizeMap(map, visited);
+        }
+
+        // TODO test it
+        if (value instanceof Pageable pageable) {
+            return Map.of(
+                    "page", pageable.getPageNumber(),
+                    "size", pageable.getPageSize(),
+                    "sort", pageable.getSort().toString()
+            );
+        }
+
+        if (value.getClass().getPackageName().startsWith("java.")) {
+            return value.toString();
         }
 
         return sanitizeObject(value, visited);

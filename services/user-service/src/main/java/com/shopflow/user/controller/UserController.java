@@ -34,7 +34,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponse> getUser(@PathVariable UUID id) {
+    public ResponseEntity<UserResponse> getUser(@PathVariable("id") UUID id) {
         UserResponse user = userService.getUserById(id);
         return ResponseEntity.ok(user);
     }
@@ -47,7 +47,7 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteUser(@PathVariable UUID id) {
+    public void deleteUser(@PathVariable("id") UUID id) {
         userService.deleteUser(id);
     }
 }

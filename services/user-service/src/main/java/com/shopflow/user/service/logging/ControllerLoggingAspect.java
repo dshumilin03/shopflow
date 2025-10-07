@@ -64,7 +64,7 @@ public class ControllerLoggingAspect {
 
             log.error(
                     "[Controller][ERROR] {} {}{} | status={} | duration={}ms | correlationId={} | handler={} | error={} | args={}",
-                    method, uri, query, status, duration, correlationId, handler, e.getMessage(), sanitizedArgs, e
+                    method, uri, query, status, duration, correlationId, handler, e.getMessage(), sanitizedArgs
             );
             throw e;
         }

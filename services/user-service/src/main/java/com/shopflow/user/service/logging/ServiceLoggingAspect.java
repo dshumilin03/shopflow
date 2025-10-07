@@ -20,12 +20,19 @@ public class ServiceLoggingAspect {
 
     @Around("execution(* com.shopflow.user.service..*(..)) && !within(com.shopflow.user.service.logging..*)")
     public Object logAround(ProceedingJoinPoint joinPoint) throws Throwable {
+
         String correlationId = MDC.get("correlationId");
+        if (correlationId == null || correlationId.isBlank()) {
+            correlationId = "no-cid";
+        }
+
+        String className = joinPoint.getSignature().getDeclaringType().getSimpleName();
         String methodName = joinPoint.getSignature().getName();
+        String methodSignature = className + "." + methodName + "(..)";
+
         String sanitizedArgs = sanitizer.sanitize(joinPoint.getArgs());
 
         long start = System.currentTimeMillis();
-
         try {
             Object result = joinPoint.proceed();
             long duration = System.currentTimeMillis() - start;
@@ -33,15 +40,19 @@ public class ServiceLoggingAspect {
 
             log.info(
                     "[Service] {} | correlationId={} | status=SUCCESS | duration={}ms | args={} | result={}",
-                    methodName, correlationId, duration, sanitizedArgs, sanitizedResult
+                    methodSignature, correlationId, duration, sanitizedArgs, sanitizedResult
             );
+
             return result;
+
         } catch (Exception e) {
             long duration = System.currentTimeMillis() - start;
+
             log.error(
                     "[Service][ERROR] {} | correlationId={} | status=FAILED | duration={}ms | error={} | args={}",
-                    methodName, correlationId, duration, e.getMessage(), sanitizedArgs, e
+                    methodSignature, correlationId, duration, e.getMessage(), sanitizedArgs
             );
+
             throw e;
         }
     }

@@ -141,7 +141,7 @@ class LoggingSanitizerTest {
         String json = sanitizer.sanitize(new Object[]{dto});
 
         assertThat(json).contains("test");
-        assertThat(json).contains("<error>");
+        assertThat(json).contains("Thread");
     }
 
     @Test
@@ -151,6 +151,6 @@ class LoggingSanitizerTest {
 
         String json = sanitizer.sanitize(input);
 
-        assertThat(json).contains("a").contains("b").contains("c");
+        assertThat(json).contains("\"a\"").contains("\"b\"").contains("\"c\"");
     }
 }

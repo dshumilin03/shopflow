@@ -1,30 +1,32 @@
 package com.shopflow.user.exception;
 
 import com.shopflow.user.config.TestSecurityConfig;
-import com.shopflow.user.controller.DummyController;
+import com.shopflow.user.controller.UserController;
+import com.shopflow.user.dto.UserResponse;
+import com.shopflow.user.service.UserService;
 import com.shopflow.user.service.exception.GlobalExceptionHandler;
 import com.shopflow.user.service.exception.UserNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 
-import java.util.UUID;
-
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers = DummyController.class)
+@WebMvcTest(controllers = UserController.class)
 @Import({GlobalExceptionHandler.class, TestSecurityConfig.class})
 @AutoConfigureMockMvc
 public class GlobalExceptionHandlerTest {
@@ -35,9 +37,15 @@ public class GlobalExceptionHandlerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @MockBean
+    private UserService userService;
+
     @Test
     public void shouldReturnUserNotFoundExceptionWithUUID() throws Exception {
-        mockMvc.perform(get("/api/test/user-not-found-uuid")
+
+        when(userService.getUserById(any())).thenThrow(new UserNotFoundException(userUUID));
+
+        mockMvc.perform(get("/api/users/" + userUUID)
                         .header("X-Correlation-Id", "abc-123")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
@@ -51,7 +59,10 @@ public class GlobalExceptionHandlerTest {
 
     @Test
     public void shouldReturnUserNotFoundExceptionWithEmail() throws Exception {
-        mockMvc.perform(get("/api/test/user-not-found-email")
+
+        when(userService.getUserByEmail(any())).thenThrow(new UserNotFoundException(userEmail));
+
+        mockMvc.perform(get("/api/users/by-email?email=" + userEmail)
                         .header("X-Correlation-Id", "abc-123")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
@@ -66,7 +77,7 @@ public class GlobalExceptionHandlerTest {
     @Test
     public void shouldReturnMethodArgumentNotValidWithInformation() throws Exception {
 
-        mockMvc.perform(post("/api/test/validation")
+        mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{ \"email\": \"sample@gmail.com\", \"password\": \"\", \"role\": \"USER\" }")
                         .header("X-Correlation-Id", "abc-123"))
@@ -81,7 +92,7 @@ public class GlobalExceptionHandlerTest {
     @Test
     public void shouldReturnInternatlErrorWithInformation() throws Exception {
 
-        mockMvc.perform(post("/api/test/internal-error")
+        mockMvc.perform(post("/api/users/by-email?email=" + userEmail)
                         .header("X-Correlation-Id", "abc-123"))
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.errorCode").value("INTERNAL_SERVER_ERROR"))
